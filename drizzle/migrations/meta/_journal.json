@@ -1,0 +1,27 @@
+{
+  "version": "7",
+  "dialect": "postgresql",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "7",
+      "when": 1795407194880,
+      "tag": "0000_import_core_packing_and_ledger_tables",
+      "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1795407282887,
+      "tag": "0001_packing_list_functions_and_history",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1795407331149,
+      "tag": "0002_bookkeeping_transactions_transfers_import_and_audit",
+      "breakpoints": true
+    }
+  ]
+}
