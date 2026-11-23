@@ -29,8 +29,14 @@ function Page() {
   };
   const savePw = async () => {
     if (pw.next.length < 10) { toast.error("Password baru minimal 10 karakter"); return; }
+    if (!pw.current) { toast.error("Password saat ini wajib diisi"); return; }
+    if (pw.next === pw.current) { toast.error("Password baru harus berbeda dari password saat ini"); return; }
+    const email = session?.user.email;
+    if (!email) { toast.error("Sesi tidak valid, silakan login ulang"); return; }
     setBusy(true);
-    const { error } = await supabase.auth.updateUser({ password: pw.next, current_password: pw.current } as never);
+    const check = await supabase.auth.signInWithPassword({ email, password: pw.current });
+    if (check.error) { setBusy(false); toast.error("Password saat ini salah"); return; }
+    const { error } = await supabase.auth.updateUser({ password: pw.next });
     setBusy(false);
     if (error) { toast.error(error.message); return; }
     toast.success("Password diperbarui"); setPw({ current: "", next: "" });
