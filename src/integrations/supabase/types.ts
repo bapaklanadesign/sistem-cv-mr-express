@@ -220,6 +220,50 @@ export type Database = {
           },
         ]
       }
+      pl_koli_scans: {
+        Row: {
+          code: string
+          id: string
+          koli_no: number | null
+          packing_list_id: string
+          reason: string | null
+          scanned_at: string
+          scanned_by: string
+          scanned_by_name: string | null
+          status: string
+        }
+        Insert: {
+          code: string
+          id?: string
+          koli_no?: number | null
+          packing_list_id: string
+          reason?: string | null
+          scanned_at?: string
+          scanned_by?: string
+          scanned_by_name?: string | null
+          status: string
+        }
+        Update: {
+          code?: string
+          id?: string
+          koli_no?: number | null
+          packing_list_id?: string
+          reason?: string | null
+          scanned_at?: string
+          scanned_by?: string
+          scanned_by_name?: string | null
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pl_koli_scans_packing_list_id_fkey"
+            columns: ["packing_list_id"]
+            isOneToOne: false
+            referencedRelation: "pl_packing_lists"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       pl_packing_lists: {
         Row: {
           consignee_id: string
