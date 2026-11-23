@@ -7,6 +7,7 @@ import { PageHeader } from "./_authenticated";
 import { Panel, QueryState, td, th } from "@/components/ui-kit";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { PasswordInput } from "@/components/ui/password-input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { ConfirmDialog } from "@/components/confirm-dialog";
@@ -102,7 +103,7 @@ function Page() {
           <form onSubmit={submit} className="min-w-0 space-y-3 [&_input]:min-w-0 [&_input]:text-base sm:[&_input]:text-sm">
             <Input aria-label="Nama lengkap" placeholder="Nama lengkap" required maxLength={80} value={f.fullName} onChange={(e) => setF({ ...f, fullName: e.target.value })} />
             <Input aria-label="Email" placeholder="Email" type="email" required value={f.email} onChange={(e) => setF({ ...f, email: e.target.value })} />
-            <Input aria-label="Password awal (min. 10 karakter)" placeholder="Password awal (min. 10 karakter)" type="password" required minLength={10} maxLength={72} value={f.password} onChange={(e) => setF({ ...f, password: e.target.value })} />
+            <PasswordInput aria-label="Password awal (min. 10 karakter)" placeholder="Password awal (min. 10 karakter)" required minLength={10} maxLength={72} value={f.password} onChange={(e) => setF({ ...f, password: e.target.value })} />
             <RoleSelect value={f.role} onChange={(r) => setF({ ...f, role: r })} taken={(r) => taken(r)} />
             {err && <p role="alert" className="break-words rounded bg-danger-soft px-3 py-2 text-xs text-destructive">{err}</p>}
             <Button type="submit" className="w-full" disabled={busy}>{busy ? "Membuat..." : "Buat Akun"}</Button>
@@ -164,7 +165,7 @@ function PasswordDialog({ user, onClose }: { user: ManagedUser | null; onClose: 
         <DialogHeader><DialogTitle>Reset Password</DialogTitle></DialogHeader>
         <form onSubmit={save} className="space-y-3">
           <p className="text-sm text-muted-foreground [overflow-wrap:anywhere]">Password baru untuk <b>{user?.email}</b>. Sesi lain akun ini akan diakhiri.</p>
-          <Input aria-label="Password baru (min. 10 karakter)" placeholder="Password baru (min. 10 karakter)" type="password" required minLength={10} maxLength={72} value={pw} onChange={(e) => setPw(e.target.value)} />
+          <PasswordInput aria-label="Password baru (min. 10 karakter)" placeholder="Password baru (min. 10 karakter)" required minLength={10} maxLength={72} value={pw} onChange={(e) => setPw(e.target.value)} />
           {err && <p role="alert" className="break-words rounded bg-danger-soft px-3 py-2 text-xs text-destructive">{err}</p>}
           <DialogFooter><Button type="button" variant="outline" onClick={onClose} disabled={busy}>Batal</Button><Button type="submit" disabled={busy}>{busy ? "Menyimpan..." : "Simpan Password"}</Button></DialogFooter>
         </form>

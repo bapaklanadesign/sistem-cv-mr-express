@@ -5,6 +5,7 @@ import { PageHeader } from "./_authenticated";
 import { Panel } from "@/components/ui-kit";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { PasswordInput } from "@/components/ui/password-input";
 import { supabase } from "@/integrations/supabase/client";
 import { roleLabel, useAuth } from "@/lib/auth";
 
@@ -55,8 +56,8 @@ function Page() {
         </Panel>
         <Panel title="Ganti Password">
           <div className="space-y-3">
-            <Input type="password" placeholder="Password saat ini" autoComplete="current-password" value={pw.current} onChange={(e) => setPw({ ...pw, current: e.target.value })} />
-            <Input type="password" placeholder="Password baru (min. 10)" autoComplete="new-password" value={pw.next} onChange={(e) => setPw({ ...pw, next: e.target.value })} />
+            <PasswordInput placeholder="Password saat ini" autoComplete="current-password" value={pw.current} onChange={(e) => setPw({ ...pw, current: e.target.value })} />
+            <PasswordInput placeholder="Password baru (min. 10)" autoComplete="new-password" value={pw.next} onChange={(e) => setPw({ ...pw, next: e.target.value })} />
             <Button onClick={savePw} disabled={busy}>Ganti Password</Button>
           </div>
         </Panel>
