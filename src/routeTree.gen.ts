@@ -33,6 +33,7 @@ import { Route as AuthenticatedPengirimPenerimaRouteImport } from './routes/_aut
 import { Route as AuthenticatedPengirimanRouteImport } from './routes/_authenticated.pengiriman'
 import { Route as AuthenticatedProfilRouteImport } from './routes/_authenticated.profil'
 import { Route as AuthenticatedRekeningRouteImport } from './routes/_authenticated.rekening'
+import { Route as AuthenticatedScanKoliRouteImport } from './routes/_authenticated.scan-koli'
 import { Route as AuthenticatedTransaksiRouteImport } from './routes/_authenticated.transaksi'
 import { Route as AuthenticatedTransferRouteImport } from './routes/_authenticated.transfer'
 import { Route as AuthenticatedPackingListIndexRouteImport } from './routes/_authenticated.packing-list.index'
@@ -164,6 +165,11 @@ const AuthenticatedRekeningRoute = AuthenticatedRekeningRouteImport.update({
   path: '/rekening',
   getParentRoute: () => AuthenticatedRoute,
 } as any)
+const AuthenticatedScanKoliRoute = AuthenticatedScanKoliRouteImport.update({
+  id: '/scan-koli',
+  path: '/scan-koli',
+  getParentRoute: () => AuthenticatedRoute,
+} as any)
 const AuthenticatedTransaksiRoute = AuthenticatedTransaksiRouteImport.update({
   id: '/transaksi',
   path: '/transaksi',
@@ -223,6 +229,7 @@ export interface FileRoutesByFullPath {
   '/pengiriman': typeof AuthenticatedPengirimanRoute
   '/profil': typeof AuthenticatedProfilRoute
   '/rekening': typeof AuthenticatedRekeningRoute
+  '/scan-koli': typeof AuthenticatedScanKoliRoute
   '/transaksi': typeof AuthenticatedTransaksiRoute
   '/transfer': typeof AuthenticatedTransferRoute
   '/packing-list/baru': typeof AuthenticatedPackingListBaruRoute
@@ -254,6 +261,7 @@ export interface FileRoutesByTo {
   '/pengiriman': typeof AuthenticatedPengirimanRoute
   '/profil': typeof AuthenticatedProfilRoute
   '/rekening': typeof AuthenticatedRekeningRoute
+  '/scan-koli': typeof AuthenticatedScanKoliRoute
   '/transaksi': typeof AuthenticatedTransaksiRoute
   '/transfer': typeof AuthenticatedTransferRoute
   '/packing-list/baru': typeof AuthenticatedPackingListBaruRoute
@@ -287,6 +295,7 @@ export interface FileRoutesById {
   '/_authenticated/pengiriman': typeof AuthenticatedPengirimanRoute
   '/_authenticated/profil': typeof AuthenticatedProfilRoute
   '/_authenticated/rekening': typeof AuthenticatedRekeningRoute
+  '/_authenticated/scan-koli': typeof AuthenticatedScanKoliRoute
   '/_authenticated/transaksi': typeof AuthenticatedTransaksiRoute
   '/_authenticated/transfer': typeof AuthenticatedTransferRoute
   '/_authenticated/packing-list/baru': typeof AuthenticatedPackingListBaruRoute
@@ -320,6 +329,7 @@ export interface FileRouteTypes {
     | '/pengiriman'
     | '/profil'
     | '/rekening'
+    | '/scan-koli'
     | '/transaksi'
     | '/transfer'
     | '/packing-list/baru'
@@ -351,6 +361,7 @@ export interface FileRouteTypes {
     | '/pengiriman'
     | '/profil'
     | '/rekening'
+    | '/scan-koli'
     | '/transaksi'
     | '/transfer'
     | '/packing-list/baru'
@@ -383,6 +394,7 @@ export interface FileRouteTypes {
     | '/_authenticated/pengiriman'
     | '/_authenticated/profil'
     | '/_authenticated/rekening'
+    | '/_authenticated/scan-koli'
     | '/_authenticated/transaksi'
     | '/_authenticated/transfer'
     | '/_authenticated/packing-list/baru'
@@ -572,6 +584,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedRekeningRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
+    '/_authenticated/scan-koli': {
+      id: '/_authenticated/scan-koli'
+      path: '/scan-koli'
+      fullPath: '/scan-koli'
+      preLoaderRoute: typeof AuthenticatedScanKoliRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
     '/_authenticated/transaksi': {
       id: '/_authenticated/transaksi'
       path: '/transaksi'
@@ -634,6 +653,7 @@ interface AuthenticatedRouteChildren {
   AuthenticatedPengirimanRoute: typeof AuthenticatedPengirimanRoute
   AuthenticatedProfilRoute: typeof AuthenticatedProfilRoute
   AuthenticatedRekeningRoute: typeof AuthenticatedRekeningRoute
+  AuthenticatedScanKoliRoute: typeof AuthenticatedScanKoliRoute
   AuthenticatedTransaksiRoute: typeof AuthenticatedTransaksiRoute
   AuthenticatedTransferRoute: typeof AuthenticatedTransferRoute
   AuthenticatedPackingListBaruRoute: typeof AuthenticatedPackingListBaruRoute
@@ -659,6 +679,7 @@ const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
   AuthenticatedPengirimanRoute: AuthenticatedPengirimanRoute,
   AuthenticatedProfilRoute: AuthenticatedProfilRoute,
   AuthenticatedRekeningRoute: AuthenticatedRekeningRoute,
+  AuthenticatedScanKoliRoute: AuthenticatedScanKoliRoute,
   AuthenticatedTransaksiRoute: AuthenticatedTransaksiRoute,
   AuthenticatedTransferRoute: AuthenticatedTransferRoute,
   AuthenticatedPackingListBaruRoute: AuthenticatedPackingListBaruRoute,

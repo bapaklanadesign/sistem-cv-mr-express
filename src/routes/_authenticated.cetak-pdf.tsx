@@ -17,13 +17,14 @@ export const Route = createFileRoute("/_authenticated/cetak-pdf")({
 function Page() {
   const q = useQuery(plListQ());
   const { print, busyId } = usePrintPl();
-  const { printLabels, labelBusyId } = usePrintLabels();
+  const { printLabels, labelBusyId, labelDialog } = usePrintLabels();
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(1);
   const rows = filterPl(q.data ?? [], search, "all");
   const pages = Math.max(1, Math.ceil(rows.length / 25));
   return (
     <>
+      {labelDialog}
       <PageHeader title="Cetak PDF" subtitle="PDF selalu dibuat dari data terbaru di database">
         <Button asChild size="sm" variant="outline"><Link to="/manifest"><FileStack className="h-4 w-4" />Cetak Manifest Kapal</Link></Button>
       </PageHeader>

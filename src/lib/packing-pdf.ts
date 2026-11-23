@@ -98,16 +98,27 @@ export function labelCount(totalKoli: number | string | null | undefined): numbe
 }
 
 /** Prints one 100x75 mm sticker per koli, each with a QR code of the packing list number and "n/total". */
-export async function printKoliLabels(pl: PlDetail) {
+/** QR payload printed on each koli label; parsed back by the scanner. */
+export const koliCode = (plNumber: string, n: number, total: number) => `MRX|${plNumber}|${n}|${total}`;
+
+/** Clamps a requested label range to 1..total. */
+export function labelRange(total: number, from?: number, to?: number): [number, number] {
+  const a = Math.min(Math.max(1, Math.floor(from ?? 1)), total);
+  const b = Math.min(Math.max(a, Math.floor(to ?? total)), total);
+  return [a, b];
+}
+
+export async function printKoliLabels(pl: PlDetail, range?: { from?: number; to?: number }) {
   const { jsPDF } = await lib();
   const QR = (await import("qrcode")).default;
-  const qr = await QR.toDataURL(pl.pl_number, { margin: 0, width: 300 });
   const total = labelCount(pl.total_koli);
+  const [from, to] = labelRange(total, range?.from, range?.to);
   const doc = new jsPDF({ orientation: "landscape", unit: "mm", format: [100, 75] });
   const city = (p: PlRow["shipper"], port: PlRow["origin"]) => (p?.city || port?.city || port?.name || "-").toUpperCase();
   const fit = (t: string, w: number) => (doc.splitTextToSize(t, w) as string[])[0] ?? "";
-  for (let i = 1; i <= total; i++) {
-    if (i > 1) doc.addPage([100, 75], "landscape");
+  for (let i = from; i <= to; i++) {
+    if (i > from) doc.addPage([100, 75], "landscape");
+    const qr = await QR.toDataURL(koliCode(pl.pl_number, i, total), { margin: 0, width: 300 });
     doc.setLineWidth(0.4); doc.rect(3, 3, 94, 69);
     doc.setFont("helvetica", "bold"); doc.setFontSize(11); doc.text("CV MR EXPRESS", 6, 10);
     doc.setFont("helvetica", "normal"); doc.setFontSize(7); doc.text(d(pl.pl_date), 94, 10, { align: "right" });
@@ -124,5 +135,5 @@ export async function printKoliLabels(pl: PlDetail) {
     doc.setFont("helvetica", "normal"); doc.setFontSize(7);
     doc.text(fit(`${pl.vessel?.name ?? "-"}${pl.voyage_no ? ` V.${pl.voyage_no}` : ""} · ${pl.origin?.name ?? "-"} -> ${pl.destination?.name ?? "-"}`, 88), 6, 66);
   }
-  doc.save(`label-${pl.pl_number}.pdf`);
+  doc.save(`label-${pl.pl_number}${from === 1 && to === total ? "" : `-${from}-${to}`}.pdf`);
 }

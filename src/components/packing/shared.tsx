@@ -8,7 +8,8 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } f
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { PL_STATUSES, plStatusLabel, plStatusTone, type PlStatus } from "@/lib/packing-logic";
 import { plDetailQ, plError, setPlStatus } from "@/lib/packing-data";
-import { printPackingList, printKoliLabels } from "@/lib/packing-pdf";
+import { labelCount, printPackingList, printKoliLabels } from "@/lib/packing-pdf";
+import { Input } from "@/components/ui/input";
 
 export function PlStatusBadge({ s, className }: { s: PlStatus; className?: string }) {
   return <span className={cn("dash-pill", plStatusTone[s], className)}>{plStatusLabel[s]}</span>;
@@ -40,17 +41,50 @@ export function usePrintPl() {
 export function usePrintLabels() {
   const qc = useQueryClient();
   const [labelBusyId, setBusy] = useState<string | null>(null);
+  const [target, setTarget] = useState<{ id: string; total: number; pl: string } | null>(null);
+  const [from, setFrom] = useState("1");
+  const [to, setTo] = useState("1");
   const printLabels = async (id: string) => {
     setBusy(id);
     try {
       const pl = await qc.fetchQuery({ ...plDetailQ(id), staleTime: 0 });
       if (!pl) throw new Error("Packing list tidak ditemukan");
-      await printKoliLabels(pl);
-      toast.success(`Label koli ${pl.pl_number} diunduh`);
+      const total = labelCount(pl.total_koli);
+      setFrom("1"); setTo(String(total)); setTarget({ id, total, pl: pl.pl_number });
     } catch (e) { toast.error(plError(e)); }
     finally { setBusy(null); }
   };
-  return { printLabels, labelBusyId };
+  const run = async () => {
+    if (!target) return;
+    const f = Number(from), t = Number(to);
+    if (!Number.isInteger(f) || !Number.isInteger(t) || f < 1 || t < f || t > target.total) { toast.error(`Rentang koli harus antara 1 dan ${target.total}`); return; }
+    setBusy(target.id);
+    try {
+      const pl = await qc.fetchQuery({ ...plDetailQ(target.id), staleTime: 0 });
+      if (!pl) throw new Error("Packing list tidak ditemukan");
+      await printKoliLabels(pl, { from: f, to: t });
+      toast.success(`Label koli ${f}–${t} dari ${pl.pl_number} diunduh`);
+      setTarget(null);
+    } catch (e) { toast.error(plError(e)); }
+    finally { setBusy(null); }
+  };
+  const labelDialog = (
+    <Dialog open={!!target} onOpenChange={(o) => !o && setTarget(null)}>
+      <DialogContent>
+        <DialogHeader><DialogTitle>Cetak Label Koli {target?.pl}</DialogTitle>
+          <DialogDescription>Total {target?.total} koli. Pilih nomor koli yang ingin dicetak.</DialogDescription></DialogHeader>
+        <div className="grid grid-cols-2 gap-3">
+          <label className="text-xs font-semibold">Dari koli<Input type="number" min={1} max={target?.total} value={from} onChange={(e) => setFrom(e.target.value)} /></label>
+          <label className="text-xs font-semibold">Sampai koli<Input type="number" min={1} max={target?.total} value={to} onChange={(e) => setTo(e.target.value)} /></label>
+        </div>
+        <div className="flex justify-end gap-2">
+          <Button variant="outline" onClick={() => setTarget(null)}>Batal</Button>
+          <Button onClick={run} disabled={labelBusyId === target?.id}>{labelBusyId === target?.id ? "Menyiapkan..." : "Cetak"}</Button>
+        </div>
+      </DialogContent>
+    </Dialog>
+  );
+  return { printLabels, labelBusyId, labelDialog };
 }
 
 export function StatusDialog({ pl, onClose }: { pl: { id: string; pl_number: string; status: PlStatus } | null; onClose: () => void }) {

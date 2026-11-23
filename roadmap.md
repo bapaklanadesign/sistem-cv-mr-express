@@ -4,3 +4,4 @@
 - [ ] Verify public pages and a signed-in packing-list workflow.
 - [ ] Import existing records and users (waiting for CSV/JSON exports).
 - [ ] Publish/cut over production (waiting for user request).
+- [x] Koli label range printing and QR scan verification with AI summary.

@@ -33,7 +33,7 @@ function Page() {
   const refresh = usePlRefresh();
   const q = useQuery(plDetailQ(id));
   const { print, busyId } = usePrintPl();
-  const { printLabels, labelBusyId } = usePrintLabels();
+  const { printLabels, labelBusyId, labelDialog } = usePrintLabels();
   const [statusOpen, setStatusOpen] = useState(false);
   const [delOpen, setDelOpen] = useState(false);
   const [delBusy, setDelBusy] = useState(false);
@@ -46,6 +46,7 @@ function Page() {
   };
   return (
     <>
+      {labelDialog}
       <PageHeader title={pl?.pl_number ?? "Detail Packing List"} {...(pl ? { subtitle: `Status: ${plStatusLabel[pl.status]}` } : {})}>
         {pl && <>
           <Button asChild size="sm" variant="outline"><Link to="/packing-list/$id/edit" params={{ id }}><Pencil className="h-4 w-4" />Edit</Link></Button>
