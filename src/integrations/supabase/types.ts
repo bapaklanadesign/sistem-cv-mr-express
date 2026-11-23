@@ -677,7 +677,67 @@ export type Database = {
       }
     }
     Functions: {
-      claim_initial_admin: { Args: never; Returns: undefined }
+      _audit_account: {
+        Args: { _action: string; _after: Json; _before: Json; _target: string }
+        Returns: undefined
+      }
+      _create_staff_account: {
+        Args: {
+          _email: string
+          _full_name: string
+          _password: string
+          _role: Database["public"]["Enums"]["app_role"]
+        }
+        Returns: string
+      }
+      _require_super_admin: { Args: never; Returns: undefined }
+      _role_label: {
+        Args: { _role: Database["public"]["Enums"]["app_role"] }
+        Returns: string
+      }
+      admin_create_user: {
+        Args: {
+          _email: string
+          _full_name: string
+          _password: string
+          _role: Database["public"]["Enums"]["app_role"]
+        }
+        Returns: string
+      }
+      admin_delete_user: { Args: { _user_id: string }; Returns: undefined }
+      admin_list_users: {
+        Args: never
+        Returns: {
+          active: boolean
+          created_at: string
+          email: string
+          full_name: string
+          id: string
+          last_sign_in_at: string
+          role: Database["public"]["Enums"]["app_role"]
+        }[]
+      }
+      admin_reset_password: {
+        Args: { _password: string; _user_id: string }
+        Returns: undefined
+      }
+      admin_set_user_active: {
+        Args: { _active: boolean; _user_id: string }
+        Returns: undefined
+      }
+      admin_update_user: {
+        Args: {
+          _email: string
+          _full_name: string
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: undefined
+      }
+      bootstrap_super_admin: {
+        Args: { _email: string; _full_name: string; _password: string }
+        Returns: string
+      }
       create_bank_account: {
         Args: {
           p_ledger: Database["public"]["Enums"]["ledger"]
@@ -834,13 +894,6 @@ export type Database = {
           isOneToOne: true
           isSetofReturn: false
         }
-      }
-      set_managed_role: {
-        Args: {
-          p_role: Database["public"]["Enums"]["app_role"]
-          p_user_id: string
-        }
-        Returns: undefined
       }
       set_opening_balance: {
         Args: { p_account_id: string; p_amount: number; p_reason: string }
