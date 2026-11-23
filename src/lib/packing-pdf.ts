@@ -90,3 +90,39 @@ export async function printManifest(info: { vessel: string; voyage: string | nul
   doc.setFontSize(7); doc.text(`Dicetak ${new Date().toLocaleString("id-ID")} dari data sistem CV MR Express`, 14, doc.internal.pageSize.getHeight() - 8);
   doc.save(`manifest-${info.vessel}-${info.voyage ?? "tanpa-voyage"}`.toLowerCase().replace(/[^a-z0-9]+/g, "-") + ".pdf");
 }
+
+/** Number of koli labels for a packing list: total koli rounded, at least 1. */
+export function labelCount(totalKoli: number | string | null | undefined): number {
+  const n = Math.round(Number(totalKoli) || 0);
+  return Math.max(1, Math.min(n, 2000));
+}
+
+/** Prints one 100x75 mm sticker per koli, each with a QR code of the packing list number and "n/total". */
+export async function printKoliLabels(pl: PlDetail) {
+  const { jsPDF } = await lib();
+  const QR = (await import("qrcode")).default;
+  const qr = await QR.toDataURL(pl.pl_number, { margin: 0, width: 300 });
+  const total = labelCount(pl.total_koli);
+  const doc = new jsPDF({ orientation: "landscape", unit: "mm", format: [100, 75] });
+  const city = (p: PlRow["shipper"], port: PlRow["origin"]) => (p?.city || port?.city || port?.name || "-").toUpperCase();
+  const fit = (t: string, w: number) => (doc.splitTextToSize(t, w) as string[])[0] ?? "";
+  for (let i = 1; i <= total; i++) {
+    if (i > 1) doc.addPage([100, 75], "landscape");
+    doc.setLineWidth(0.4); doc.rect(3, 3, 94, 69);
+    doc.setFont("helvetica", "bold"); doc.setFontSize(11); doc.text("CV MR EXPRESS", 6, 10);
+    doc.setFont("helvetica", "normal"); doc.setFontSize(7); doc.text(d(pl.pl_date), 94, 10, { align: "right" });
+    doc.setFont("helvetica", "bold"); doc.setFontSize(13); doc.text(pl.pl_number, 6, 17);
+    doc.addImage(qr, "PNG", 70, 13, 24, 24);
+    doc.setFont("helvetica", "normal"); doc.setFontSize(7); doc.text("Pengirim :", 6, 24);
+    doc.setFontSize(9); doc.text(fit((pl.shipper?.name ?? "-").toUpperCase(), 60), 6, 29);
+    doc.setFont("helvetica", "bold"); doc.text(fit(city(pl.shipper, pl.origin), 60), 6, 34);
+    doc.line(6, 39, 94, 39);
+    doc.setFont("helvetica", "normal"); doc.setFontSize(7); doc.text("Penerima :", 6, 45);
+    doc.setFontSize(9); doc.text(fit((pl.consignee?.name ?? "-").toUpperCase(), 58), 6, 50);
+    doc.setFont("helvetica", "bold"); doc.text(fit(city(pl.consignee, pl.destination), 58), 6, 55);
+    doc.setFontSize(18); doc.text(`${i}/${total}`, 94, 52, { align: "right" });
+    doc.setFont("helvetica", "normal"); doc.setFontSize(7);
+    doc.text(fit(`${pl.vessel?.name ?? "-"}${pl.voyage_no ? ` V.${pl.voyage_no}` : ""} · ${pl.origin?.name ?? "-"} -> ${pl.destination?.name ?? "-"}`, 88), 6, 66);
+  }
+  doc.save(`label-${pl.pl_number}.pdf`);
+}

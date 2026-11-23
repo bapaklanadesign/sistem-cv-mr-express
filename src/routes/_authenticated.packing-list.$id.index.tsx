@@ -2,12 +2,12 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { ArrowLeft, Pencil, Printer, RefreshCw, Trash2 } from "lucide-react";
+import { ArrowLeft, Pencil, Printer, Tag, RefreshCw, Trash2 } from "lucide-react";
 import { PageHeader } from "./_authenticated";
 import { Panel, QueryState, td, th } from "@/components/ui-kit";
 import { ConfirmDialog } from "@/components/confirm-dialog";
 import { Button } from "@/components/ui/button";
-import { PlStatusBadge, StatusDialog, plMeta, usePlRefresh, usePrintPl } from "@/components/packing/shared";
+import { PlStatusBadge, StatusDialog, plMeta, usePlRefresh, usePrintPl, usePrintLabels } from "@/components/packing/shared";
 import { PlActivityList } from "@/components/packing/activity";
 import { useAuth } from "@/lib/auth";
 import { fmtDate, fmtDateTime } from "@/lib/format";
@@ -33,6 +33,7 @@ function Page() {
   const refresh = usePlRefresh();
   const q = useQuery(plDetailQ(id));
   const { print, busyId } = usePrintPl();
+  const { printLabels, labelBusyId } = usePrintLabels();
   const [statusOpen, setStatusOpen] = useState(false);
   const [delOpen, setDelOpen] = useState(false);
   const [delBusy, setDelBusy] = useState(false);
@@ -49,7 +50,7 @@ function Page() {
         {pl && <>
           <Button asChild size="sm" variant="outline"><Link to="/packing-list/$id/edit" params={{ id }}><Pencil className="h-4 w-4" />Edit</Link></Button>
           <Button size="sm" variant="outline" onClick={() => setStatusOpen(true)}><RefreshCw className="h-4 w-4" />Ubah Status</Button>
-          <Button size="sm" onClick={() => print(id)} disabled={busyId === id}><Printer className="h-4 w-4" />{busyId === id ? "Menyiapkan..." : "Cetak PDF"}</Button>
+          <Button size="sm" onClick={() => print(id)} disabled={busyId === id}><Printer className="h-4 w-4" />{busyId === id ? "Menyiapkan..." : "Cetak PDF"}</Button> <Button size="sm" variant="outline" onClick={() => printLabels(id)} disabled={labelBusyId === id}><Tag className="h-4 w-4" />{labelBusyId === id ? "Menyiapkan..." : "Cetak Label Koli"}</Button>
           {canDeletePl(role) && <Button size="sm" variant="outline" className="text-destructive" onClick={() => setDelOpen(true)}><Trash2 className="h-4 w-4" />Hapus</Button>}
         </>}
       </PageHeader>

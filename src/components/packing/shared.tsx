@@ -8,7 +8,7 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } f
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { PL_STATUSES, plStatusLabel, plStatusTone, type PlStatus } from "@/lib/packing-logic";
 import { plDetailQ, plError, setPlStatus } from "@/lib/packing-data";
-import { printPackingList } from "@/lib/packing-pdf";
+import { printPackingList, printKoliLabels } from "@/lib/packing-pdf";
 
 export function PlStatusBadge({ s, className }: { s: PlStatus; className?: string }) {
   return <span className={cn("dash-pill", plStatusTone[s], className)}>{plStatusLabel[s]}</span>;
@@ -35,6 +35,22 @@ export function usePrintPl() {
     finally { setBusyId(null); }
   };
   return { print, busyId };
+}
+
+export function usePrintLabels() {
+  const qc = useQueryClient();
+  const [labelBusyId, setBusy] = useState<string | null>(null);
+  const printLabels = async (id: string) => {
+    setBusy(id);
+    try {
+      const pl = await qc.fetchQuery({ ...plDetailQ(id), staleTime: 0 });
+      if (!pl) throw new Error("Packing list tidak ditemukan");
+      await printKoliLabels(pl);
+      toast.success(`Label koli ${pl.pl_number} diunduh`);
+    } catch (e) { toast.error(plError(e)); }
+    finally { setBusy(null); }
+  };
+  return { printLabels, labelBusyId };
 }
 
 export function StatusDialog({ pl, onClose }: { pl: { id: string; pl_number: string; status: PlStatus } | null; onClose: () => void }) {
