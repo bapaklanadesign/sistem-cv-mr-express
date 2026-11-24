@@ -288,6 +288,7 @@ export type Database = {
           total_value: number
           total_volume_m3: number
           total_weight_kg: number
+          tracking_token: string
           updated_at: string
           updated_by: string | null
           vessel_id: string | null
@@ -316,6 +317,7 @@ export type Database = {
           total_value?: number
           total_volume_m3?: number
           total_weight_kg?: number
+          tracking_token?: string
           updated_at?: string
           updated_by?: string | null
           vessel_id?: string | null
@@ -344,6 +346,7 @@ export type Database = {
           total_value?: number
           total_volume_m3?: number
           total_weight_kg?: number
+          tracking_token?: string
           updated_at?: string
           updated_by?: string | null
           vessel_id?: string | null
@@ -902,6 +905,7 @@ export type Database = {
         }
         Returns: number
       }
+      public_track_packing_list: { Args: { _token: string }; Returns: Json }
       save_packing_list: {
         Args: { p_header: Json; p_id: string; p_items: Json }
         Returns: {
@@ -927,6 +931,7 @@ export type Database = {
           total_value: number
           total_volume_m3: number
           total_weight_kg: number
+          tracking_token: string
           updated_at: string
           updated_by: string | null
           vessel_id: string | null
@@ -972,6 +977,7 @@ export type Database = {
           total_value: number
           total_volume_m3: number
           total_weight_kg: number
+          tracking_token: string
           updated_at: string
           updated_by: string | null
           vessel_id: string | null
