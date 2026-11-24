@@ -1,6 +1,8 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/lib/auth";
 import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
 import { Camera, CameraOff, Sparkles, Trash2 } from "lucide-react";
@@ -12,7 +14,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { plMeta } from "@/components/packing/shared";
 import { plListQ } from "@/lib/packing-data";
 import { labelCount } from "@/lib/packing-pdf";
-import { matchScans } from "@/lib/koli-verify";
+import { classifyScan, matchScans } from "@/lib/koli-verify";
 import { verifyKoliScans } from "@/lib/koli-verify.functions";
 import { cn } from "@/lib/utils";
 
@@ -26,7 +28,16 @@ type AiResult = Awaited<ReturnType<typeof verifyKoliScans>>;
 function Page() {
   const q = useQuery(plListQ());
   const [plId, setPlId] = useState("");
-  const [codes, setCodes] = useState<string[]>([]);
+  const qc = useQueryClient();
+  const { role, session } = useAuth();
+  const scansQ = useQuery({
+    queryKey: ["pl", "koli-scans", plId], enabled: !!plId,
+    queryFn: async () => {
+      const { data, error } = await supabase.from("pl_koli_scans").select("id,code,koli_no,status,reason,scanned_by_name,scanned_at").eq("packing_list_id", plId).order("scanned_at", { ascending: false });
+      if (error) throw error; return data;
+    },
+  });
+  const codes = useMemo(() => (scansQ.data ?? []).map((r) => r.code), [scansQ.data]);
   const [manual, setManual] = useState("");
   const [camOn, setCamOn] = useState(false);
   const [ai, setAi] = useState<AiResult | null>(null);
@@ -36,10 +47,28 @@ function Page() {
   const total = pl ? labelCount(pl.total_koli) : 0;
   const local = useMemo(() => (pl ? matchScans(pl.pl_number, total, codes) : null), [pl, total, codes]);
 
-  const add = (c: string) => {
-    const code = c.trim(); if (!code) return;
-    setCodes((prev) => { if (prev.includes(code)) return prev; toast.success(`Terbaca: ${code.split("|").slice(1).join(" · ") || code}`); return [...prev, code]; });
+  const add = async (c: string, source: "camera" | "manual") => {
+    const code = c.trim(); if (!code || !pl) return;
+    const track = window.__lovableEvents?.track;
+    if (codes.includes(code)) { track?.("project.koli_qr_scanned", { result: "duplicate", source }); toast.info("Label ini sudah dipindai sebelumnya"); return; }
+    const r = classifyScan(pl.pl_number, total, code);
+    const { error } = await supabase.from("pl_koli_scans").insert({
+      packing_list_id: pl.id, code, koli_no: r.koli, status: r.status, reason: r.status === "problem" ? r.reason : null,
+      scanned_by_name: session?.user.email ?? null,
+    });
+    if (error) { if (error.code === "23505") { toast.info("Label ini sudah dipindai sebelumnya"); return; } toast.error("Gagal menyimpan hasil pindai"); return; }
+    track?.("project.koli_qr_scanned", { result: r.status, source });
+    if (r.status === "verified") { track?.("project.koli_verified", { source }); toast.success(`Koli ${r.koli}/${total} terverifikasi`); }
+    else { track?.("project.koli_label_problem", { kind: r.kind }); toast.error(r.reason); }
     setAi(null);
+    await qc.invalidateQueries({ queryKey: ["pl", "koli-scans", pl.id] });
+  };
+
+  const reset = async () => {
+    if (!pl || !confirm("Hapus semua riwayat pindai untuk Packing List ini?")) return;
+    const { error } = await supabase.from("pl_koli_scans").delete().eq("packing_list_id", pl.id);
+    if (error) { toast.error("Gagal menghapus riwayat"); return; }
+    setAi(null); await qc.invalidateQueries({ queryKey: ["pl", "koli-scans", pl.id] });
   };
 
   const runAi = async () => {
@@ -56,7 +85,7 @@ function Page() {
       <PageHeader title="Scan Label Koli" subtitle="Pindai QR di stiker koli lalu cocokkan dengan data Packing List" />
       <div className="grid gap-4 lg:grid-cols-2">
         <Panel title="1. Pilih Packing List">
-          <Select value={plId} onValueChange={(v) => { setPlId(v); setCodes([]); setAi(null); }}>
+          <Select value={plId} onValueChange={(v) => { setPlId(v); setAi(null); }}>
             <SelectTrigger aria-label="Packing List"><SelectValue placeholder="Pilih Packing List" /></SelectTrigger>
             <SelectContent>{q.data?.map((p) => <SelectItem key={p.id} value={p.id}>{p.pl_number} · {p.consignee?.name ?? "-"} ({labelCount(p.total_koli)} koli)</SelectItem>)}</SelectContent>
           </Select>
@@ -64,15 +93,15 @@ function Page() {
             <Button size="sm" variant={camOn ? "outline" : "default"} disabled={!plId} onClick={() => setCamOn((v) => !v)}>
               {camOn ? <><CameraOff className="h-4 w-4" />Matikan kamera</> : <><Camera className="h-4 w-4" />Pindai dengan kamera</>}
             </Button>
-            {camOn && <Scanner onCode={add} />}
-            <form className="flex gap-2" onSubmit={(e) => { e.preventDefault(); add(manual); setManual(""); }}>
+            {camOn && <Scanner onCode={(c) => void add(c, "camera")} />}
+            <form className="flex gap-2" onSubmit={(e) => { e.preventDefault(); void add(manual, "manual"); setManual(""); }}>
               <Input placeholder="Atau ketik / tempel kode label" value={manual} onChange={(e) => setManual(e.target.value)} disabled={!plId} />
               <Button type="submit" size="sm" variant="outline" disabled={!plId}>Tambah</Button>
             </form>
           </div>
         </Panel>
         <Panel title={`2. Hasil (${local?.verified.length ?? 0}/${total} koli terverifikasi)`} action={<div className="flex gap-2">
-          <Button size="sm" variant="ghost" disabled={!codes.length} onClick={() => { setCodes([]); setAi(null); }}><Trash2 className="h-4 w-4" />Reset</Button>
+          {role === "super_admin" && <Button size="sm" variant="ghost" disabled={!codes.length} onClick={reset}><Trash2 className="h-4 w-4" />Reset</Button>}
           <Button size="sm" onClick={runAi} disabled={!plId || busy}><Sparkles className="h-4 w-4" />{busy ? "Mencocokkan..." : "Cocokkan dengan AI"}</Button></div>}>
           {!pl ? <p className="text-sm text-muted-foreground">Pilih Packing List terlebih dahulu.</p> : <>
             <div className="grid grid-cols-8 gap-1 sm:grid-cols-10">
@@ -88,6 +117,15 @@ function Page() {
           </>}
         </Panel>
       </div>
+      {pl && <div className="mt-4"><Panel title={`Riwayat pindai ${pl.pl_number} (${scansQ.data?.length ?? 0})`}>
+        {!scansQ.data?.length ? <p className="text-sm text-muted-foreground">Belum ada pindaian. Pindaian tersimpan otomatis, jadi bisa dilanjutkan kapan saja.</p> :
+          <ul className="divide-y text-xs">{scansQ.data.map((r) => <li key={r.id} className="grid grid-cols-[auto_minmax(0,1fr)] gap-x-3 py-2">
+            <span className={cn("font-bold", r.status === "verified" ? "text-success" : "text-destructive")}>{r.status === "verified" ? `Koli ${r.koli_no}` : "Bermasalah"}</span>
+            <span className="min-w-0 break-all">{r.status === "verified" ? r.code : `${r.code} — ${r.reason ?? ""}`}</span>
+            <span />
+            <span className="text-muted-foreground">{new Date(r.scanned_at).toLocaleString("id-ID")} · {r.scanned_by_name ?? "-"}</span>
+          </li>)}</ul>}
+      </Panel></div>}
     </>
   );
 }

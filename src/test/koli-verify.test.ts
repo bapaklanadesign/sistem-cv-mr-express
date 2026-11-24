@@ -14,3 +14,8 @@ describe("labelRange", () => {
   it("prints only the chosen koli numbers", () => expect(labelRange(70, 10, 20)).toEqual([10, 20]));
   it("keeps the range inside the total koli", () => expect(labelRange(70, 60, 99)).toEqual([60, 70]));
 });
+import { classifyScan } from "@/lib/koli-verify";
+describe("classifyScan", () => {
+  it("verifies a label of this packing list", () => expect(classifyScan("PL-1", 5, koliCode("PL-1", 2, 5))).toEqual({ status: "verified", koli: 2 }));
+  it("flags a label with a different koli total", () => expect(classifyScan("PL-1", 5, koliCode("PL-1", 2, 6))).toMatchObject({ status: "problem", kind: "total_mismatch" }));
+});

@@ -5,3 +5,5 @@
 - [ ] Import existing records and users (waiting for CSV/JSON exports).
 - [ ] Publish/cut over production (waiting for user request).
 - [x] Koli label range printing and QR scan verification with AI summary.
+- [x] Koli scan history storage + analytics events.
+- [ ] Public QR tracking page (/lacak/<token>), QR encodes tracking URL.
