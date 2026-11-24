@@ -36,6 +36,7 @@ import { Route as AuthenticatedRekeningRouteImport } from './routes/_authenticat
 import { Route as AuthenticatedScanKoliRouteImport } from './routes/_authenticated.scan-koli'
 import { Route as AuthenticatedTransaksiRouteImport } from './routes/_authenticated.transaksi'
 import { Route as AuthenticatedTransferRouteImport } from './routes/_authenticated.transfer'
+import { Route as LacakTokenRouteImport } from './routes/lacak.$token'
 import { Route as AuthenticatedPackingListIndexRouteImport } from './routes/_authenticated.packing-list.index'
 import { Route as AuthenticatedPackingListBaruRouteImport } from './routes/_authenticated.packing-list.baru'
 import { Route as AuthenticatedPackingListIdIndexRouteImport } from './routes/_authenticated.packing-list.$id.index'
@@ -180,6 +181,11 @@ const AuthenticatedTransferRoute = AuthenticatedTransferRouteImport.update({
   path: '/transfer',
   getParentRoute: () => AuthenticatedRoute,
 } as any)
+const LacakTokenRoute = LacakTokenRouteImport.update({
+  id: '/lacak/$token',
+  path: '/lacak/$token',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AuthenticatedPackingListIndexRoute =
   AuthenticatedPackingListIndexRouteImport.update({
     id: '/packing-list/',
@@ -232,6 +238,7 @@ export interface FileRoutesByFullPath {
   '/scan-koli': typeof AuthenticatedScanKoliRoute
   '/transaksi': typeof AuthenticatedTransaksiRoute
   '/transfer': typeof AuthenticatedTransferRoute
+  '/lacak/$token': typeof LacakTokenRoute
   '/packing-list/baru': typeof AuthenticatedPackingListBaruRoute
   '/packing-list/': typeof AuthenticatedPackingListIndexRoute
   '/packing-list/$id/edit': typeof AuthenticatedPackingListIdEditRoute
@@ -264,6 +271,7 @@ export interface FileRoutesByTo {
   '/scan-koli': typeof AuthenticatedScanKoliRoute
   '/transaksi': typeof AuthenticatedTransaksiRoute
   '/transfer': typeof AuthenticatedTransferRoute
+  '/lacak/$token': typeof LacakTokenRoute
   '/packing-list/baru': typeof AuthenticatedPackingListBaruRoute
   '/packing-list': typeof AuthenticatedPackingListIndexRoute
   '/packing-list/$id/edit': typeof AuthenticatedPackingListIdEditRoute
@@ -298,6 +306,7 @@ export interface FileRoutesById {
   '/_authenticated/scan-koli': typeof AuthenticatedScanKoliRoute
   '/_authenticated/transaksi': typeof AuthenticatedTransaksiRoute
   '/_authenticated/transfer': typeof AuthenticatedTransferRoute
+  '/lacak/$token': typeof LacakTokenRoute
   '/_authenticated/packing-list/baru': typeof AuthenticatedPackingListBaruRoute
   '/_authenticated/packing-list/': typeof AuthenticatedPackingListIndexRoute
   '/_authenticated/packing-list/$id/edit': typeof AuthenticatedPackingListIdEditRoute
@@ -332,6 +341,7 @@ export interface FileRouteTypes {
     | '/scan-koli'
     | '/transaksi'
     | '/transfer'
+    | '/lacak/$token'
     | '/packing-list/baru'
     | '/packing-list/'
     | '/packing-list/$id/edit'
@@ -364,6 +374,7 @@ export interface FileRouteTypes {
     | '/scan-koli'
     | '/transaksi'
     | '/transfer'
+    | '/lacak/$token'
     | '/packing-list/baru'
     | '/packing-list'
     | '/packing-list/$id/edit'
@@ -397,6 +408,7 @@ export interface FileRouteTypes {
     | '/_authenticated/scan-koli'
     | '/_authenticated/transaksi'
     | '/_authenticated/transfer'
+    | '/lacak/$token'
     | '/_authenticated/packing-list/baru'
     | '/_authenticated/packing-list/'
     | '/_authenticated/packing-list/$id/edit'
@@ -412,6 +424,7 @@ export interface RootRouteChildren {
   RutePengirimanRoute: typeof RutePengirimanRoute
   SetupRoute: typeof SetupRoute
   TentangKamiRoute: typeof TentangKamiRoute
+  LacakTokenRoute: typeof LacakTokenRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -605,6 +618,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedTransferRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
+    '/lacak/$token': {
+      id: '/lacak/$token'
+      path: '/lacak/$token'
+      fullPath: '/lacak/$token'
+      preLoaderRoute: typeof LacakTokenRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/_authenticated/packing-list/': {
       id: '/_authenticated/packing-list/'
       path: '/packing-list'
@@ -701,6 +721,7 @@ const rootRouteChildren: RootRouteChildren = {
   RutePengirimanRoute: RutePengirimanRoute,
   SetupRoute: SetupRoute,
   TentangKamiRoute: TentangKamiRoute,
+  LacakTokenRoute: LacakTokenRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

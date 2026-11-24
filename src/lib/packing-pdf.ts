@@ -98,8 +98,9 @@ export function labelCount(totalKoli: number | string | null | undefined): numbe
 }
 
 /** Prints one 100x75 mm sticker per koli, each with a QR code of the packing list number and "n/total". */
-/** QR payload printed on each koli label; parsed back by the scanner. */
-export const koliCode = (plNumber: string, n: number, total: number) => `MRX|${plNumber}|${n}|${total}`;
+/** QR payload printed on each koli label: the public tracking URL, carrying PL number and koli for the scanner. */
+export const koliCode = (origin: string, token: string, plNumber: string, n: number, total: number) =>
+  `${origin}/lacak/${token}?pl=${encodeURIComponent(plNumber)}&koli=${n}&total=${total}`;
 
 /** Clamps a requested label range to 1..total. */
 export function labelRange(total: number, from?: number, to?: number): [number, number] {
@@ -118,7 +119,7 @@ export async function printKoliLabels(pl: PlDetail, range?: { from?: number; to?
   const fit = (t: string, w: number) => (doc.splitTextToSize(t, w) as string[])[0] ?? "";
   for (let i = from; i <= to; i++) {
     if (i > from) doc.addPage([100, 75], "landscape");
-    const qr = await QR.toDataURL(koliCode(pl.pl_number, i, total), { margin: 0, width: 300 });
+    const qr = await QR.toDataURL(koliCode(window.location.origin, pl.tracking_token, pl.pl_number, i, total), { margin: 0, width: 300 });
     doc.setLineWidth(0.4); doc.rect(3, 3, 94, 69);
     doc.setFont("helvetica", "bold"); doc.setFontSize(11); doc.text("CV MR EXPRESS", 6, 10);
     doc.setFont("helvetica", "normal"); doc.setFontSize(7); doc.text(d(pl.pl_date), 94, 10, { align: "right" });

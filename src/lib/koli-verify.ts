@@ -3,8 +3,15 @@ export type ProblemKind = "not_mrx" | "invalid_number" | "other_pl" | "total_mis
 export type ParsedScan = { code: string; pl: string; n: number; total: number } | { code: string; error: string; kind: ProblemKind };
 
 export function parseKoliCode(code: string): ParsedScan {
-  const parts = code.trim().split("|");
-  if (parts.length !== 4 || parts[0] !== "MRX") return { code, error: "Bukan label koli MR Express", kind: "not_mrx" };
+  let parts = code.trim().split("|");
+  if (parts[0] !== "MRX") {
+    try {
+      const u = new URL(code.trim());
+      if (!/^\/lacak\/[^/]+$/.test(u.pathname)) throw new Error();
+      parts = ["MRX", u.searchParams.get("pl") ?? "", u.searchParams.get("koli") ?? "", u.searchParams.get("total") ?? ""];
+    } catch { return { code, error: "Bukan label koli MR Express", kind: "not_mrx" }; }
+  }
+  if (parts.length !== 4) return { code, error: "Bukan label koli MR Express", kind: "not_mrx" };
   const n = Number(parts[2]), total = Number(parts[3]);
   if (!parts[1] || !Number.isInteger(n) || !Number.isInteger(total) || n < 1 || n > total) return { code, error: "Nomor koli tidak valid", kind: "invalid_number" };
   return { code, pl: parts[1], n, total };
