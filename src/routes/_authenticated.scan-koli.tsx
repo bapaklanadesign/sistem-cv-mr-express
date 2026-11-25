@@ -3,7 +3,6 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
-import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
 import { Camera, CameraOff, Sparkles, Trash2 } from "lucide-react";
 import { PageHeader } from "./_authenticated";
@@ -15,7 +14,7 @@ import { plMeta } from "@/components/packing/shared";
 import { plListQ } from "@/lib/packing-data";
 import { labelCount } from "@/lib/packing-pdf";
 import { classifyScan, matchScans } from "@/lib/koli-verify";
-import { verifyKoliScans } from "@/lib/koli-verify.functions";
+import { verifyKoliScans } from "@/lib/koli-verify-ai";
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/_authenticated/scan-koli")({
@@ -42,7 +41,6 @@ function Page() {
   const [camOn, setCamOn] = useState(false);
   const [ai, setAi] = useState<AiResult | null>(null);
   const [busy, setBusy] = useState(false);
-  const verify = useServerFn(verifyKoliScans);
   const pl = q.data?.find((p) => p.id === plId);
   const total = pl ? labelCount(pl.total_koli) : 0;
   const local = useMemo(() => (pl ? matchScans(pl.pl_number, total, codes) : null), [pl, total, codes]);
@@ -74,7 +72,7 @@ function Page() {
   const runAi = async () => {
     if (!plId) return;
     setBusy(true);
-    try { setAi(await verify({ data: { plId, codes } })); }
+    try { setAi(await verifyKoliScans(plId, codes)); }
     catch (e) { toast.error(e instanceof Error ? e.message : "Gagal mencocokkan"); }
     finally { setBusy(false); }
   };

@@ -29,4 +29,6 @@ use the editor.
 - **Secrets.** Lovable manages them. Do not put secret values in the repo.
 <!-- LOVABLE:END -->
 
-- Koli label QR codes encode the public tracking URL `/lacak/<tracking_token>?pl=&koli=&total=` (legacy `MRX|pl|koli|total` still parses); public tracking reads only via the service-role `public_track_packing_list` RPC inside a server fn; scan matching is deterministic in `src/lib/koli-verify.ts` and the AI Gateway only writes the summary — keeps verification correct even when AI is unavailable.
+- Koli label QR codes encode the public tracking URL `/lacak/<tracking_token>?pl=&koli=&total=` (legacy `MRX|pl|koli|total` still parses); public tracking reads only via the token-gated `public_track_packing_list` RPC (public-safe fields only); scan matching is deterministic in `src/lib/koli-verify.ts` and the AI Gateway only writes the summary — keeps verification correct even when AI is unavailable.
+- The app is a plain Vite React SPA (index.html + src/main.tsx, no TanStack Start/SSR/Nitro, no createServerFn) built to `dist/` for Firebase Hosting with an SPA rewrite; all data goes through the browser Supabase client and RLS/SQL functions — static hosting has no server runtime.
+- Lovable asset pointers are mirrored into `public/media` (`npm run sync:media`) and rewritten at build time; Firebase has no `/__l5e` proxy.

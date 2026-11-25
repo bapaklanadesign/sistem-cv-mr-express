@@ -1,0 +1,1 @@
+GRANT EXECUTE ON FUNCTION public.public_track_packing_list(uuid) TO anon, authenticated;

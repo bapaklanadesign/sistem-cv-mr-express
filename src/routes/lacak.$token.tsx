@@ -1,7 +1,7 @@
 import { createFileRoute, Link, useRouter, type ErrorComponentProps } from "@tanstack/react-router";
 import { queryOptions, useSuspenseQuery } from "@tanstack/react-query";
 import { ArrowLeft, Anchor, Boxes, CalendarClock, MapPin, Package, PackageSearch, Scale, Ship, User } from "lucide-react";
-import { getPublicTracking } from "@/lib/tracking.functions";
+import { getPublicTracking } from "@/lib/tracking";
 import { fmtNum, plStatusLabel, unitLabel, type PlStatus } from "@/lib/packing-logic";
 import { fmtDate } from "@/lib/format";
 import { Button } from "@/components/ui/button";
