@@ -6,7 +6,7 @@ import { fmtNum, plStatusLabel, unitLabel, type PlStatus } from "@/lib/packing-l
 import { fmtDate } from "@/lib/format";
 import { Button } from "@/components/ui/button";
 
-const trackQ = (token: string) => queryOptions({ queryKey: ["public-track", token], queryFn: () => getPublicTracking({ data: { token } }) });
+export const trackQ = (token: string) => queryOptions({ queryKey: ["public-track", token], queryFn: () => getPublicTracking({ data: { token } }) });
 
 export const Route = createFileRoute("/lacak/$token")({
   loader: ({ params, context }) => context.queryClient.ensureQueryData(trackQ(params.token)),
@@ -48,7 +48,7 @@ function NotFound() {
   );
 }
 
-function TrackError({ error, reset }: ErrorComponentProps) {
+export function TrackError({ error, reset }: ErrorComponentProps) {
   const router = useRouter();
   return <Shell><div className="rounded-xl border bg-card p-8 text-center"><h1 className="text-lg font-bold">Gagal memuat data tracking</h1>
     <p className="mt-1 text-sm text-muted-foreground">{error instanceof Error ? error.message : "Terjadi kesalahan"}</p>
@@ -64,6 +64,10 @@ function Row({ k, v }: { k: string; v: React.ReactNode }) {
 
 function TrackPage() {
   const { token } = Route.useParams();
+  return <TrackView token={token} />;
+}
+
+export function TrackView({ token }: { token: string }) {
   const { data: t } = useSuspenseQuery(trackQ(token));
   if (!t) return <Shell><NotFound /></Shell>;
   const status = t.status as PlStatus;
