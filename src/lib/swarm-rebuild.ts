@@ -78,8 +78,8 @@ export function createSwarm(root: HTMLElement, layer: HTMLElement, update: (done
         if (!target) return;
         const box = target.getBoundingClientRect();
         const visible = box.bottom > 0 && box.top < innerHeight;
-        const x = Math.max(12, Math.min(innerWidth - 100, box.left + box.width * (.25 + .5 * Math.abs(Math.sin(elapsed / (700 + i * 89))))));
-        const y = Math.max(60, Math.min(innerHeight - 80, box.top + box.height * (.3 + .4 * Math.abs(Math.cos(elapsed / (900 + i * 63))))));
+        const x = Math.max(12, Math.min(innerWidth - 80, visible ? box.left + box.width * (.25 + .5 * Math.abs(Math.sin(elapsed / (700 + i * 89)))) : 20 + (innerWidth - 100) * ((i + .5) / count)));
+        const y = Math.max(60, Math.min(innerHeight - 80, visible ? box.top + box.height * (.3 + .4 * Math.abs(Math.cos(elapsed / (900 + i * 63)))) : 100 + (innerHeight - 250) * ((i + .5) / count)));
         operator.x += (x - operator.x) * .09; operator.y += (y - operator.y) * .09;
         operator.cursor.style.transform = `translate3d(${operator.x}px,${operator.y}px,0)`;
         operator.cursor.classList.toggle("swarm-click", Math.sin(elapsed / 280 + i) > .8);
