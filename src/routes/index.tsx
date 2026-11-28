@@ -1,5 +1,4 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { SwarmRebuild } from "@/components/swarm-rebuild";
 import { JourneyHome } from "@/components/journey-home";
 import { publicHead } from "@/lib/public-shipping";
 
@@ -10,4 +9,4 @@ export const Route = createFileRoute("/")({
   },
   component: Home,
 });
-function Home() { return <><JourneyHome /><SwarmRebuild /></>; }
+function Home() { return <JourneyHome />; }
