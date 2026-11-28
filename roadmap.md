@@ -5,5 +5,5 @@
 - [ ] Shorten per-koli QR generator: blocked until existing per-koli tracking-code mapping is available (current token identifies only the Packing List).
 
 # Reference animation refinement
-- [ ] Rebuild the homepage from an empty canvas using independent cursor jobs, scan/reveal and safe cleanup.
-- [ ] Verify completion, skip, repeat entry and exclusion of internal pages on desktop and mobile.
+- [x] Rebuild the homepage from an empty canvas using independent cursor jobs, scan/reveal and safe cleanup.
+- [x] Verify completion, skip, repeat entry and exclusion of internal pages on desktop and mobile.

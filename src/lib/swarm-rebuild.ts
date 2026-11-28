@@ -7,7 +7,7 @@ export type SwarmConfig = {
 export const swarmDefaults: SwarmConfig = {
   cursorCount: 7,
   colors: ["var(--swarm-red)", "var(--swarm-blue)", "var(--swarm-cyan)", "var(--swarm-green)", "var(--swarm-yellow)", "var(--swarm-purple)", "var(--swarm-orange)"],
-  speed: 1, duration: 70000, auto: true,
+  speed: 1, duration: 180000, auto: true,
   order: [".j-backdrop", ".j-nav .j-logo", ".j-links a", ".j-btn-sm", ".j-burger", ".j-hero > *", ".j-cue", ".j-blk:not(.j-hero):not(.j-cue) > *", ".j-sec .j-eyebrow", ".j-sec h2", ".j-sec .j-lead", ".j-adv-card", ".j-map", ".j-note", ".j-collage", ".j-more", ".j-cta-sec .j-btn", ".j-phone", ".s-foot-grid > *", ".s-foot-base"],
 };
 const clamp = (v: number, a = 0, b = 1) => Math.min(b, Math.max(a, v));
@@ -16,7 +16,7 @@ const names = ["Ayu", "Bima", "Citra", "Dani", "Eka", "Fajar", "Gita"];
 type Item = { el: HTMLElement; state: "waiting" | "working" | "done" };
 type Operator = {
   cursor: HTMLElement; outline: HTMLElement; scan: HTMLElement;
-  item?: Item; phase: "idle" | "move" | "dwell" | "build";
+  item?: Item | undefined; phase: "idle" | "move" | "dwell" | "build";
   x: number; y: number; fx: number; fy: number; tx: number; ty: number;
   start: number; duration: number; bend: number; pace: number;
 };
@@ -81,10 +81,12 @@ export function createSwarm(root: HTMLElement, layer: HTMLElement, update: (done
     let done = 0, lastDone = -1, finish = 0, lastTime = performance.now();
     const begin = lastTime;
     const sceneScroll = (item: Item) => {
+      if (item.el.closest(".j-hero, .j-cue")) return 0;
       const scene = item.el.closest<HTMLElement>("[data-scene]");
       if (scene) {
         const box = scene.getBoundingClientRect();
-        return clamp(box.top + scrollY + box.height * .35, 0, document.documentElement.scrollHeight - innerHeight);
+        const offset = item.el.closest(".pos-top") ? .05 : .35;
+        return clamp(box.top + scrollY + box.height * offset, 0, document.documentElement.scrollHeight - innerHeight);
       }
       const box = item.el.getBoundingClientRect();
       if (box.top >= 68 && box.bottom < innerHeight - 120) return scrollY;
@@ -102,8 +104,10 @@ export function createSwarm(root: HTMLElement, layer: HTMLElement, update: (done
       if (Math.abs(desired - scrollY) > 50) return;
       const box = item.el.getBoundingClientRect();
       // Hidden mobile navigation has no box, so it needs no visible reconstruction.
-      if (box.width < 2 || box.height < 2) { item.state = "done"; done++; return; }
-      if (box.bottom < 0 || box.top > innerHeight - 90) return;
+      if (box.width < 2 || box.height < 2 || (item.el.closest(".j-nav") && (box.bottom < 0 || box.left > innerWidth || box.right < 0))) {
+        item.state = "done"; done++; return;
+      }
+      if (box.bottom < 0 || box.top > innerHeight - 8) return;
       item.state = "working"; op.item = item; op.phase = "move";
       op.fx = op.x; op.fy = op.y;
       op.tx = clamp(box.left + box.width * (.1 + Math.random() * .25), 16, innerWidth - 90);
